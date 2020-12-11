@@ -1,6 +1,6 @@
-app/.chalice/deployments/
-app/.chalice/deployed/
-app/.chalice/venv/
+.chalice/deployments/
+.chalice/deployed/
+.chalice/venv/
 venv*
 __pycache__
 cdk.out

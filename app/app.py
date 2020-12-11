@@ -1,12 +1,27 @@
+""" Sample Chalice "hello world" application """
+import json
 from chalice import Chalice, Response
 from jsonschema import validate, ValidationError
 from chalicelib import REG_SCHEMA, STATUS_SCHEMA, idemia_service
 
-app = Chalice(app_name="give_idemia_microservice")
+with open(".chalice/config.json") as config_file:
+    CONFIG = json.load(config_file)
+
+if "app_name" not in CONFIG:
+    raise KeyError("No 'app_name' configured in app/.chalice/config.json")
+
+APP_NAME = CONFIG.get("app_name")
+
+# Chalice currently requires app.py to have 'app' (lowercase) available
+app = Chalice(app_name=APP_NAME)
 
 
 @app.route("/enrollment", methods=["POST"])
 def enrollment_register():
+    """
+    Pre-Enrollment Registration Function. Receives an enrollment applicant and registers said
+    applicant with the Idemia IPP service.
+    """
     data = app.current_request.json_body
 
     # validate request body
@@ -37,11 +52,14 @@ def enrollment_register():
 
 @app.route("/locations", methods=["GET"])
 def locations_get():
+    """
+    Locations Function. Receives a zip code and returns a list of local IPP locations.
+    """
     param = app.current_request.query_params
 
     # validate query parameter
     try:
-        zip = param["zip"]
+        zipcode = param["zip"]
     except KeyError as e:
         return Response(
             body={"error": str(e)},
@@ -51,7 +69,7 @@ def locations_get():
 
     # proxy request to Idemia API
     try:
-        idemia_service.locations(zip)
+        idemia_service.locations(zipcode)
         return Response(
             body={"locations": []},
             status_code=200,
@@ -67,6 +85,9 @@ def locations_get():
 
 @app.route("/enrollment", methods=["GET"])
 def status_get():
+    """
+    Fetch Status Function. Returns a user's status based on a given query parameter UUID.
+    """
     param = app.current_request.query_params
 
     # validate query parameter
@@ -97,6 +118,10 @@ def status_get():
 
 @app.route("/enrollment", methods=["PUT"])
 def status_put():
+    """
+    Update Status Function. Receives a UEID as a query parameter and a status in the request body.
+    Updates the user's status corresponding to the UEID to the new status provided.
+    """
     data = app.current_request.json_body
     param = app.current_request.query_params
 
