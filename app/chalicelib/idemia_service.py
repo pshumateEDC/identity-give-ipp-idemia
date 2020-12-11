@@ -1,14 +1,23 @@
+"""
+Business logic stubs for Idemia Microservice
+"""
+
+
 def register(applicant):
-    raise Exception("No Idemia Conneciton")
+    """Business logic stub for applicant registration"""
+    raise NotImplementedError("No Idemia Conneciton")
 
 
-def locations(zip):
-    raise Exception("No Idemia Conneciton")
+def locations(zipcode):
+    """Business logic stub for location fetching"""
+    raise NotImplementedError("No Idemia Conneciton")
 
 
 def status_get(uuid):
-    raise Exception("No Idemia Conneciton")
+    """Business logic stub for status fetching"""
+    raise NotImplementedError("No Idemia Conneciton")
 
 
 def status_update(ueid, status):
-    raise Exception("No Idemia Conneciton")
+    """Business logic stub for status updating"""
+    raise NotImplementedError("No Idemia Conneciton")

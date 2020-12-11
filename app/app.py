@@ -27,9 +27,9 @@ def enrollment_register():
     # validate request body
     try:
         validate(data, REG_SCHEMA)
-    except ValidationError as e:
+    except ValidationError as validation_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(validation_error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )
@@ -42,9 +42,9 @@ def enrollment_register():
             status_code=201,
             headers={"Content-Type": "application/json"},
         )
-    except Exception as e:
+    except NotImplementedError as ni_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(ni_error)},
             status_code=503,
             headers={"Content-Type": "application/json"},
         )
@@ -60,9 +60,9 @@ def locations_get():
     # validate query parameter
     try:
         zipcode = param["zip"]
-    except KeyError as e:
+    except KeyError as key_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(key_error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )
@@ -75,9 +75,9 @@ def locations_get():
             status_code=200,
             headers={"Content-Type": "application/json"},
         )
-    except Exception as e:
+    except NotImplementedError as ni_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(ni_error)},
             status_code=503,
             headers={"Content-Type": "application/json"},
         )
@@ -93,24 +93,24 @@ def status_get():
     # validate query parameter
     try:
         uuid = param["uuid"]
-    except KeyError as e:
+    except KeyError as key_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(key_error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )
 
     # proxy request to Idemia API
     try:
-        idemia_service.locations(zip)
+        idemia_service.status_get(uuid)
         return Response(
             body={"status": "No Status Available."},
             status_code=200,
             headers={"Content-Type": "application/json"},
         )
-    except Exception as e:
+    except NotImplementedError as ni_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(ni_error)},
             status_code=503,
             headers={"Content-Type": "application/json"},
         )
@@ -129,9 +129,9 @@ def status_put():
     try:
         ueid = param["ueid"]
         validate(data, STATUS_SCHEMA)
-    except (KeyError, ValidationError) as e:
+    except (KeyError, ValidationError) as key_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(key_error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )
@@ -142,9 +142,9 @@ def status_put():
         return Response(
             body={}, status_code=204, headers={"Content-Type": "application/json"}
         )
-    except Exception as e:
+    except NotImplementedError as ni_error:
         return Response(
-            body={"error": str(e)},
+            body={"error": str(ni_error)},
             status_code=503,
             headers={"Content-Type": "application/json"},
         )
