@@ -60,9 +60,9 @@ def locations_get():
     # validate query parameter
     try:
         zipcode = param["zip"]
-    except KeyError as key_error:
+    except (KeyError, TypeError) as error:
         return Response(
-            body={"error": str(key_error)},
+            body={"error": str(error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )
@@ -93,9 +93,9 @@ def status_get():
     # validate query parameter
     try:
         uuid = param["uuid"]
-    except KeyError as key_error:
+    except (KeyError, TypeError) as error:
         return Response(
-            body={"error": str(key_error)},
+            body={"error": str(error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )
@@ -129,9 +129,9 @@ def status_put():
     try:
         ueid = param["ueid"]
         validate(data, STATUS_SCHEMA)
-    except (KeyError, ValidationError) as key_error:
+    except (KeyError, ValidationError, TypeError) as error:
         return Response(
-            body={"error": str(key_error)},
+            body={"error": str(error)},
             status_code=400,
             headers={"Content-Type": "application/json"},
         )

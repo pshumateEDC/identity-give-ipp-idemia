@@ -1,4 +1,5 @@
 """ Tests for app.py """
+from http import HTTPStatus
 from chalice.test import Client
 from pytest import fixture
 from app import app
@@ -11,25 +12,29 @@ def test_client():
         yield client
 
 
-def test_enrollment_register_function(client_fixture):
-    """ Ensure the enrollment function returns the correct stub """
+# Enrollment registration tests
+def test_enrollment_register_function_bad_request(client_fixture):
+    """ Ensure the enrollment function returns a 400 Bad Request on bad/empty requests """
     response = client_fixture.http.post("/enrollment")
-    assert response.json_body == {"hello": "world"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
+# Location fetch tests
 def test_locations_get_function(client_fixture):
-    """ Ensure the location function returns the correct stub """
+    """ Ensure the location function returns a 400 Bad Request on bad/empty requests """
     response = client_fixture.http.get("/locations")
-    assert response.json_body == {"locations": "none"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
+# Status fetch tests
 def test_status_get_function(client_fixture):
-    """ Ensure the get status function returns the correct stub """
+    """ Ensure the get status function returns a 400 Bad Request on bad/empty requests """
     response = client_fixture.http.get("/enrollment")
-    assert response.json_body == {"status": "empty"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
+# Status update tests
 def test_status_put_function(client_fixture):
-    """ Ensure the get update function returns the correct stub """
+    """ Ensure the get update function returns a 400 Bad Request on bad/empty requests """
     response = client_fixture.http.put("/enrollment")
-    assert response.json_body == {"hello": "world"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
