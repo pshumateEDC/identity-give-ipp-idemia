@@ -1,10 +1,6 @@
 {
   "version": "2.0",
-<<<<<<< HEAD
   "app_name": "ipp-idemia",
-=======
-  "app_name": "app",
->>>>>>> a015417954d5e59f03ac2be6822151c1f99ee2f0
   "automatic_layer": true,
   "stages": {
     "dev": {

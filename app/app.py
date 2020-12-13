@@ -1,4 +1,4 @@
-""" Sample Chalice "hello world" application """
+""" Idemia Microservice Lambda Chalice Functions """
 import json
 from chalice import Chalice, Response
 from jsonschema import validate, ValidationError
