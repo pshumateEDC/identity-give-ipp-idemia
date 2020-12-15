@@ -1,5 +1,7 @@
 """ Idemia Microservice Lambda Chalice Functions """
 import json
+import re
+from uuid import UUID
 from chalice import Chalice, Response
 from jsonschema import validate, ValidationError
 from chalicelib import REG_SCHEMA, STATUS_SCHEMA, idemia_service
@@ -27,7 +29,8 @@ def enrollment_register():
     # validate request body
     try:
         validate(data, REG_SCHEMA)
-    except ValidationError as validation_error:
+        UUID(data.get("uuid"))
+    except (ValidationError, ValueError) as validation_error:
         return Response(
             body={"error": str(validation_error)},
             status_code=400,
@@ -60,7 +63,9 @@ def locations_get():
     # validate query parameter
     try:
         zipcode = param["zip"]
-    except (KeyError, TypeError) as error:
+        if not re.search(r"^\d{5}(?:[-\s]\d{4})?$", zipcode.strip()):
+            raise ValueError("The string %s is NOT a valid ZipCode" % zipcode)
+    except (KeyError, TypeError, ValueError) as error:
         return Response(
             body={"error": str(error)},
             status_code=400,
@@ -93,7 +98,8 @@ def status_get():
     # validate query parameter
     try:
         uuid = param["uuid"]
-    except (KeyError, TypeError) as error:
+        UUID(uuid)
+    except (KeyError, TypeError, ValueError) as error:
         return Response(
             body={"error": str(error)},
             status_code=400,
@@ -128,8 +134,10 @@ def status_put():
     # validate query parameter and request body
     try:
         ueid = param["ueid"]
+        if not re.search(r"[A-Z0-9]{10}", ueid.strip()):
+            raise ValueError("The string %s is NOT a valid UEID" % ueid)
         validate(data, STATUS_SCHEMA)
-    except (KeyError, ValidationError, TypeError) as error:
+    except (KeyError, ValidationError, TypeError, ValueError) as error:
         return Response(
             body={"error": str(error)},
             status_code=400,
