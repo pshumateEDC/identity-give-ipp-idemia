@@ -23,7 +23,7 @@ def enrollment_register():
     applicant with the Idemia IPP service.
     """
     data = app.current_request.json_body
-
+    print(data)
     # validate request body
     try:
         validate(data, REG_SCHEMA)
