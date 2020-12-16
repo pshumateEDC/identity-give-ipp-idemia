@@ -44,7 +44,6 @@ def test_enrollment_register_function_bad_request(client_fixture):
         body=json.dumps(reg_invalid),
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.json_body == {"error": "badly formed hexadecimal UUID string"}
 
 
 def test_enrollment_register_not_implemented(client_fixture):
@@ -96,7 +95,6 @@ def test_status_get_function_bad_request(client_fixture):
     # invalid uuid
     response = client_fixture.http.get("/enrollment?uuid=4c4605ec-3662-11eb-adc1-")
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.json_body == {"error": "badly formed hexadecimal UUID string"}
 
 
 def test_status_get_function_not_implemented(client_fixture):
