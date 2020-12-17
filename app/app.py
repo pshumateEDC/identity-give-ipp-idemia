@@ -2,7 +2,7 @@
 import re
 from uuid import UUID
 from http import HTTPStatus
-from chalice import Chalice, Response, Error
+from chalice import Chalice, Response
 from jsonschema import validate, ValidationError
 from chalicelib import REG_SCHEMA, STATUS_SCHEMA, idemia_service
 
@@ -21,7 +21,6 @@ def enrollment_register():
     try:
         validate(data, REG_SCHEMA)
     except ValidationError:
-        raise
         return response(HTTPStatus.BAD_REQUEST, {"error": "Invalid Request Body"})
 
     # validate UUID
