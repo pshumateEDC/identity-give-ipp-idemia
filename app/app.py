@@ -9,6 +9,34 @@ from chalicelib import REG_SCHEMA, STATUS_SCHEMA, idemia_service
 app = Chalice(app_name="ipp-idemia")
 
 
+class BadRequestErrorResponse(Response):
+    """ Response sub class for Bad Request status codes """
+
+    def __init__(self, body: dict):
+        super().__init__(body=body, status_code=HTTPStatus.BAD_REQUEST)
+
+
+class UnavailableErrorResponse(Response):
+    """ Response sub class for Service Unavailable status codes """
+
+    def __init__(self, body: dict):
+        super().__init__(body=body, status_code=HTTPStatus.SERVICE_UNAVAILABLE)
+
+
+class NoContentResponse(Response):
+    """ Response sub class for No Content status codes """
+
+    def __init__(self):
+        super().__init__(body={}, status_code=HTTPStatus.NO_CONTENT)
+
+
+class OkResponse(Response):
+    """ Response sub class for OK status codes """
+
+    def __init__(self, body: dict):
+        super().__init__(body=body, status_code=HTTPStatus.OK)
+
+
 @app.route("/enrollment", methods=["POST"])
 def enrollment_register():
     """
@@ -21,21 +49,21 @@ def enrollment_register():
     try:
         validate(data, REG_SCHEMA)
     except ValidationError:
-        return response(HTTPStatus.BAD_REQUEST, {"error": "Invalid Request Body"})
+        return BadRequestErrorResponse({"error": "Invalid Request Body"})
 
     # validate UUID
     try:
         UUID(data.get("uuid"))
     except ValueError:
-        return response(HTTPStatus.BAD_REQUEST, {"error": "Invalid UUID"})
+        return BadRequestErrorResponse({"error": "Invalid UUID"})
 
     # proxy request to Idemia API
     try:
         idemia_service.register(data)
     except NotImplementedError as ni_error:
-        return response(HTTPStatus.SERVICE_UNAVAILABLE, {"error": str(ni_error)})
+        return UnavailableErrorResponse({"error": str(ni_error)})
 
-    return response(HTTPStatus.CREATED, {"status": "User Registered"})
+    return OkResponse({"status": "User Registered"})
 
 
 @app.route("/locations", methods=["GET"])
@@ -47,28 +75,26 @@ def locations_get():
 
     # check for existing query parameter
     if param is None:
-        return response(HTTPStatus.BAD_REQUEST, {"error": "Query parameters not found"})
+        return BadRequestErrorResponse({"error": "Query parameters not found"})
 
     # validate query parameter
     if "zip" not in param:
-        return response(
-            HTTPStatus.BAD_REQUEST, {"error": "'zip' not found as a query parameter"}
+        return BadRequestErrorResponse(
+            {"error": "'zip' not found as a query parameter"}
         )
     zipcode = param["zip"]
 
     # validate zip code with regex that matches 5 digit US Zip Codes or Zip + 4
     if not re.fullmatch(r"^\d{5}(-\d{4})?$", zipcode):
-        return response(
-            HTTPStatus.BAD_REQUEST, {"error": f"Invalid Zip code format: {zipcode}"}
-        )
+        return BadRequestErrorResponse({"error": f"Invalid Zip code format: {zipcode}"})
 
     # proxy request to Idemia API
     try:
         idemia_service.locations(zipcode)
     except NotImplementedError as ni_error:
-        return response(HTTPStatus.SERVICE_UNAVAILABLE, {"error": str(ni_error)})
+        return UnavailableErrorResponse({"error": str(ni_error)})
 
-    return response(HTTPStatus.OK, {"locations": []})
+    return OkResponse({"locations": []})
 
 
 @app.route("/enrollment", methods=["GET"])
@@ -80,12 +106,12 @@ def status_get():
 
     # check for existing query parameter
     if param is None:
-        return response(HTTPStatus.BAD_REQUEST, {"error": "Query parameters not found"})
+        return BadRequestErrorResponse({"error": "Query parameters not found"})
 
     # validate query parameter
     if "uuid" not in param:
-        return response(
-            HTTPStatus.BAD_REQUEST, {"error": "'uuid' not found as a query parameter"}
+        return BadRequestErrorResponse(
+            {"error": "'uuid' not found as a query parameter"}
         )
     uuid = param.get("uuid")
 
@@ -93,17 +119,15 @@ def status_get():
     try:
         UUID(uuid)
     except ValueError:
-        return response(
-            HTTPStatus.BAD_REQUEST, {"error": f"Invalid UUID format: {uuid}"}
-        )
+        return BadRequestErrorResponse({"error": f"Invalid UUID format: {uuid}"})
 
     # proxy request to Idemia API
     try:
         idemia_service.status_get(uuid)
     except NotImplementedError as ni_error:
-        return response(HTTPStatus.SERVICE_UNAVAILABLE, {"error": str(ni_error)})
+        return UnavailableErrorResponse({"error": str(ni_error)})
 
-    return response(HTTPStatus.OK, {"status": "No Status Available."})
+    return OkResponse({"status": "No Status Available."})
 
 
 @app.route("/enrollment", methods=["PUT"])
@@ -117,41 +141,30 @@ def status_put():
 
     # check for existing query parameter
     if param is None:
-        return response(HTTPStatus.BAD_REQUEST, {"error": "Query parameters not found"})
+        return BadRequestErrorResponse({"error": "Query parameters not found"})
 
     # validate query parameter and request body
     if "ueid" not in param:
-        return response(
-            HTTPStatus.BAD_REQUEST, {"error": "'ueid' not found as a query parameter"}
+        return BadRequestErrorResponse(
+            {"error": "'ueid' not found as a query parameter"}
         )
     ueid = param.get("ueid")
 
     # validate UEID
     # no knowledge on exact limitations except for 10 character string with A-Z and 0-9 permitted
     if not re.search(r"[A-Z0-9]{10}", ueid.strip()):
-        return response(
-            HTTPStatus.BAD_REQUEST, {"error": f"Invalid UEID format: {ueid}"}
-        )
+        return BadRequestErrorResponse({"error": f"Invalid UEID format: {ueid}"})
 
     # validate request body
     try:
         validate(data, STATUS_SCHEMA)
     except ValidationError:
-        return response(HTTPStatus.BAD_REQUEST, {"error": "Invalid Request Body"})
+        return BadRequestErrorResponse({"error": "Invalid Request Body"})
 
     # proxy request to Idemia API
     try:
         idemia_service.status_update(ueid, data)
     except NotImplementedError as ni_error:
-        return response(HTTPStatus.SERVICE_UNAVAILABLE, {"error": str(ni_error)})
+        return UnavailableErrorResponse({"error": str(ni_error)})
 
-    return response(HTTPStatus.NO_CONTENT, {})
-
-
-def response(status_code, body):
-    """ Helper function to eliminate duplicate code when generating an HTTP response """
-    return Response(
-        body=body,
-        status_code=status_code,
-        headers={"Content-Type": "application/json"},
-    )
+    return NoContentResponse
