@@ -14,12 +14,15 @@ def test_client():
 
 
 # Enrollment registration tests
-def test_enrollment_register_function_bad_request(client_fixture):
+def test_enrollment_register_function_bad_request_empty_body(client_fixture):
     """ Ensure the enrollment function returns a 400 Bad Request on bad/empty requests """
     # empty request
     response = client_fixture.http.post("/enrollment")
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_enrollment_register_function_bad_request_invalid_body(client_fixture):
+    """ Ensure the enrollment function returns a 400 Bad Request on bad/empty requests """
     # invalid body
     reg_invalid = {"uuid": 0, "firstName": 0, "lastName": 0, "emailAddress": 0}
     response = client_fixture.http.request(
@@ -30,6 +33,9 @@ def test_enrollment_register_function_bad_request(client_fixture):
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_enrollment_register_function_bad_request_invalid_uuid(client_fixture):
+    """ Ensure the enrollment function returns a 400 Bad Request on bad/empty requests """
     # invalid uuid
     reg_invalid = {
         "uuid": "c7b82090-172f-11eb-adc1-",
@@ -64,16 +70,22 @@ def test_enrollment_register_not_implemented(client_fixture):
 
 
 # Location fetch tests
-def test_locations_get_function_bad_request(client_fixture):
+def test_locations_get_function_bad_request_no_parameter(client_fixture):
     """ Ensure the location function returns a 400 Bad Request on bad/empty requests """
     # empty request
     response = client_fixture.http.get("/locations")
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_locations_get_function_bad_request_bad_parameter(client_fixture):
+    """ Ensure the location function returns a 400 Bad Request on bad/empty requests """
     # invalid zipcode (integers)
     response = client_fixture.http.get("/locations?zip=223122")
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_locations_get_function_bad_request_bad_parameter_string(client_fixture):
+    """ Ensure the location function returns a 400 Bad Request on bad/empty requests """
     # invalid zipcode (characters)
     response = client_fixture.http.get("/locations?zip=asdas")
     assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -86,12 +98,15 @@ def test_locations_not_implemented(client_fixture):
 
 
 # Status fetch tests
-def test_status_get_function_bad_request(client_fixture):
+def test_status_get_function_bad_request_empty(client_fixture):
     """ Ensure the get status function returns a 400 Bad Request on bad/empty requests """
     # empty request
     response = client_fixture.http.get("/enrollment")
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_status_get_function_bad_request_invalid(client_fixture):
+    """ Ensure the get status function returns a 400 Bad Request on bad/empty requests """
     # invalid uuid
     response = client_fixture.http.get("/enrollment?uuid=4c4605ec-3662-11eb-adc1-")
     assert response.status_code == HTTPStatus.BAD_REQUEST
@@ -106,40 +121,27 @@ def test_status_get_function_not_implemented(client_fixture):
 
 
 # Status update tests
-def test_status_put_function_bad_request(client_fixture):
+def test_status_put_function_bad_request_no_parameter_no_body(client_fixture):
     """ Ensure the update function returns a 400 Bad Request on bad/empty requests """
     # empty request
     response = client_fixture.http.put("/enrollment")
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_status_put_function_bad_request_invalid_parameter_no_body(client_fixture):
+    """ Ensure the update function returns a 400 Bad Request on bad/empty requests """
     # invalid ueid and no status body
     response = client_fixture.http.put("/enrollment?ueid=UZTX12BH1")
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
+
+def test_status_put_function_bad_request_valid_parameter_invalid_body(client_fixture):
+    """ Ensure the update function returns a 400 Bad Request on bad/empty requests """
     # valid ueid and invalid body
     status = {"ippstatus": 0}
     response = client_fixture.http.request(
         method="PUT",
         path="/enrollment?ueid=UZTX12BH1K",
-        headers={"Content-Type": "application/json"},
-        body=json.dumps(status),
-    )
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-
-    # invalid ueid and invalid body
-    response = client_fixture.http.request(
-        method="PUT",
-        path="/enrollment?ueid=UZTX12BH1",
-        headers={"Content-Type": "application/json"},
-        body=json.dumps(status),
-    )
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-
-    # invalid ueid and valid body
-    status = {"ippstatus": "User completed and passed IPP event."}
-    response = client_fixture.http.request(
-        method="PUT",
-        path="/enrollment?ueid=UZTX12BH1",
         headers={"Content-Type": "application/json"},
         body=json.dumps(status),
     )
