@@ -37,6 +37,13 @@ class OkResponse(Response):
         super().__init__(body=body, status_code=HTTPStatus.OK)
 
 
+class UnsupportedResponse(Response):
+    """ Response sub class for Unsupported Media Type status codes """
+
+    def __init__(self, body: dict):
+        super().__init__(body=body, status_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+
+
 @app.route("/enrollment", methods=["POST"])
 def enrollment_register():
     """
@@ -44,6 +51,11 @@ def enrollment_register():
     applicant with the Idemia IPP service.
     """
     data = app.current_request.json_body
+
+    if data is None:
+        return UnsupportedResponse(
+            {"error": "Request body is not in application/json format"}
+        )
 
     # validate request body
     try:
@@ -138,6 +150,11 @@ def status_put():
     """
     data = app.current_request.json_body
     param = app.current_request.query_params
+
+    if data is None:
+        return UnsupportedResponse(
+            {"error": "Request body is not in application/json format"}
+        )
 
     # check for existing query parameter
     if param is None:

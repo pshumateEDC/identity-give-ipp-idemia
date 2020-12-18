@@ -14,11 +14,26 @@ def test_client():
 
 
 # Enrollment registration tests
-def test_enrollment_register_function_bad_request_empty_body(client_fixture):
+def test_enrollment_register_function_unsupported_media_type_empty_body(client_fixture):
     """ Ensure the enrollment function returns a 400 Bad Request on bad/empty requests """
     # empty request
     response = client_fixture.http.post("/enrollment")
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
+
+
+def test_enrollment_register_function_unsupported_media_type_invalid_body(
+    client_fixture,
+):
+    """ Ensure the enrollment function returns a 400 Bad Request on bad/empty requests """
+    # invalid body
+    reg_invalid = {"uuid": "", "firstName": "", "lastName": "", "emailAddress": ""}
+    response = client_fixture.http.request(
+        method="POST",
+        path="/enrollment",
+        headers={"Content-Type": "text/plain"},
+        body=json.dumps(reg_invalid),
+    )
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 def test_enrollment_register_function_bad_request_invalid_body(client_fixture):
@@ -121,18 +136,37 @@ def test_status_get_function_not_implemented(client_fixture):
 
 
 # Status update tests
-def test_status_put_function_bad_request_no_parameter_no_body(client_fixture):
+def test_status_put_function_unsupported_media_type_no_parameter_no_body(
+    client_fixture,
+):
     """ Ensure the update function returns a 400 Bad Request on bad/empty requests """
     # empty request
     response = client_fixture.http.put("/enrollment")
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
-def test_status_put_function_bad_request_invalid_parameter_no_body(client_fixture):
+def test_status_put_function_unsupported_media_type_invalid_parameter_no_body(
+    client_fixture,
+):
     """ Ensure the update function returns a 400 Bad Request on bad/empty requests """
     # invalid ueid and no status body
     response = client_fixture.http.put("/enrollment?ueid=UZTX12BH1")
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
+
+
+def test_status_put_function_unsupported_media_type_valid_parameter_valid_body(
+    client_fixture,
+):
+    """ Ensure the update function returns a 400 Bad Request on bad/empty requests """
+    # valid ueid and invalid body
+    status = {"ippstatus": "updated"}
+    response = client_fixture.http.request(
+        method="PUT",
+        path="/enrollment?ueid=UZTX12BH1K",
+        headers={"Content-Type": "text/plain"},
+        body=json.dumps(status),
+    )
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 def test_status_put_function_bad_request_valid_parameter_invalid_body(client_fixture):
